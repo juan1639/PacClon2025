@@ -2,6 +2,11 @@ import pygame
 import random
 from enum import Enum
 
+# ====================================================================================
+#   fantasmas.py (modulo logica de los fantasmas/enemigos)
+#   class --> Fantasma, Direccion
+#
+# ------------------------------------------------------------------------------------
 class Direccion(Enum):
     RIGHT = "ri"
     LEFT = "le"

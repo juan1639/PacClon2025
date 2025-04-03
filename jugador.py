@@ -3,6 +3,11 @@ from enum import Enum
 from main import TileType
 from laberintos import Pantallas
 
+# ====================================================================================
+#   jugador.py (modulo logica del Pacman)
+#   class --> PacMan, PacManDies, Direccion
+#
+# ------------------------------------------------------------------------------------
 class Direccion(Enum):
     RIGHT = "ri"
     LEFT = "le"
@@ -13,8 +18,8 @@ class PacMan(pygame.sprite.Sprite):
     def __init__(self, game, x, y, dir_por_defecto=Direccion.RIGHT.value):
         super().__init__()
         self.game = game
-        self.TX = self.game.TX
-        self.TY = self.game.TY
+        self.TX = self.game.CO.TX
+        self.TY = self.game.CO.TY
         self.direccion_actual = dir_por_defecto
         self.direccion_confirmada = self.direccion_actual
 
@@ -101,11 +106,11 @@ class PacMan(pygame.sprite.Sprite):
 
     def es_teletransporte(self, x, y, vel_x):
         if y == 11:  # Línea especial para teletransporte
-            if x + vel_x > self.game.COLUMNAS:
+            if x + vel_x > self.game.CO.COLUMNAS:
                 self.rect.x = -self.TX
                 return True
             elif x + vel_x < -1:
-                self.rect.x = self.game.COLUMNAS * self.TX
+                self.rect.x = self.game.CO.COLUMNAS * self.TX
                 return True
         return False
 

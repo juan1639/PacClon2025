@@ -5,20 +5,12 @@ from jugador import *
 from fantasmas import *
 from varios import *
 from laberintos import Pantallas
+from settings import *
 
 # ====================================================================================
-#	Codigo Principal (main.py) ... clase principal --> class Game
+#   main.py (modulo principal) ... clase principal --> class Game
 #
 # ------------------------------------------------------------------------------------
-class Colores:
-    AMARILLO = (220, 190, 0)
-    AMARILLENTO = (250, 245, 130)
-    BLANCO = (240, 240, 240)
-    GRIS_FONDO = (59, 59, 59)
-    ROJO = (230, 30, 20)
-    VERDE_FONDO = (20, 240, 30)
-    AZUL_C = (144, 205, 205)
-
 class TileType(Enum):
     WALL = 9
     DOT = 1
@@ -27,33 +19,19 @@ class TileType(Enum):
 class Game:
     def __init__(self):
         pygame.init()
-        pygame.mixer.init()
 
         # Colores y constantes
-        self.colores = Colores()
-        self.TX, self.TY = 50, 50 # Tamaño Tiles
-        self.FILAS, self.COLUMNAS = 15, 19 # Filas x Columnas
-        self.DURACION_PREPARADO = 4200
-        self.TXT_PREPARADO = " Preparado! "
-        self.ZONA_SCORES = 200
-        self.RESOLUCION = (self.TX * self.COLUMNAS + self.ZONA_SCORES, self.TY * self.FILAS)
-        self.FPS = 100
+        self.COL = Colores()
+        self.CO = Constantes()
 
-        # Marcadores, ptos, nivel, vidas...
+        # Marcadores: ptos, nivel, vidas...
         self.nivel = 1
         self.puntos = 0
         self.vidas = 3
 
         # Varios
-        self.PACMAN_INI_POS = (9, 4)
-        self.N_FANTASMAS = 4
-        self.lista_argsFantasmas = [
-			(5, 8, 0, 'le'), (8, 8, 1, 'le'),
-			(10, 8, 2, 'ri'), (13, 8, 3, 'ri')
-		]
         self.sumaPtosComeFantasmas = 100	# 200 -> 400 -> 800 -> 1600
         self.temporizadorAzules = False 
-        self.duracion_azules = 8000
         self.ultimo_update_azules = pygame.time.get_ticks()
         self.ultimo_update_preparado = pygame.time.get_ticks()
 
@@ -79,39 +57,21 @@ class Game:
         }
 
         # Pantalla y reloj
-        self.pantalla = pygame.display.set_mode(self.RESOLUCION)
+        self.pantalla = pygame.display.set_mode(self.CO.RESOLUCION)
         self.reloj = pygame.time.Clock()
 
-        # Cargar sonidos
-        self.sonidos = self.cargar_sonidos()
-
-    def cargar_sonidos(self):
-        """Cargar todos los sonidos en un diccionario."""
-        return {
-            "wakawaka": self.cargar_sonido("sonido/pacmanwakawaka.ogg", 0.9),
-            "sirena": self.cargar_sonido("sonido/pacmansirena.ogg", 0.2),
-            "eating_cherry": self.cargar_sonido("sonido/pacmaneatingcherry.ogg"),
-            "pacman_dies": self.cargar_sonido("sonido/pacmandies.ogg"),
-            "gameover_retro": self.cargar_sonido("sonido/gameoveretro.ogg"),
-            "fantasmas_azules": self.cargar_sonido("sonido/pacmanazules.ogg"),
-            "eating_ghost": self.cargar_sonido("sonido/pacmaneatinghost.ogg"),
-            "inicio_nivel": self.cargar_sonido("sonido/pacmaninicionivel.ogg")
-        }
-
-    def cargar_sonido(self, ruta, volumen=1.0):
-        sonido = pygame.mixer.Sound(ruta)
-        sonido.set_volume(volumen)
-        return sonido
-
+        # Cargar sonidos del modulo settings
+        self.sonidos = Sonidos()
+    
     def obtener_indice(self, x, y):
         """Obtener índice en el laberinto 1D basado en coordenadas 2D."""
-        return y * self.COLUMNAS + x if 0 <= x < self.COLUMNAS and 0 <= y < self.FILAS else None
+        return y * self.CO.COLUMNAS + x if 0 <= x < self.CO.COLUMNAS and 0 <= y < self.CO.FILAS else None
     
     def crear_pantalla_nivel(self):
         """Crear el laberinto y los tiles correspondientes."""
         contador = -1
-        for i in range(self.FILAS):
-            for ii in range(self.COLUMNAS):
+        for i in range(self.CO.FILAS):
+            for ii in range(self.CO.COLUMNAS):
                 contador += 1
                 valor_tile = Pantallas.get_laberinto(self.nivel)[contador]
 
@@ -140,13 +100,13 @@ class Game:
         self.crear_pantalla_nivel()
         self.instanciar_objetos()
         self.instanciar_textos_iniciales()
-        self.sonidos["inicio_nivel"].play()
+        self.sonidos.reproducir("inicio_nivel")
     
     def obtener_grafico(self, nombrePng, escala):
         """Devolver una imagen y un rectangulo."""
         img = pygame.image.load('pacGraf/' + nombrePng).convert()
-        escalaX = self.TX * escala
-        escalaY = self.TY * escala
+        escalaX = self.CO.TX * escala
+        escalaY = self.CO.TY * escala
         image = pygame.transform.scale(img, (escalaX, escalaY))
         image.set_colorkey((255, 255, 255))
         rect = image.get_rect()
@@ -155,12 +115,12 @@ class Game:
     
     def instanciar_objetos(self):
         """Instanciar/re-instanciar Pacman, fantasmas, etc..."""
-        self.pacman = PacMan(self, self.PACMAN_INI_POS[0], self.PACMAN_INI_POS[1])
+        self.pacman = PacMan(self, self.CO.PACMAN_INI_POS[0], self.CO.PACMAN_INI_POS[1])
         self.listas_sprites["all_sprites"].add(self.pacman)
         self.listas_sprites["pacman"].add(self.pacman)
         
-        """ for i in range(self.N_FANTASMAS):
-            datos = self.lista_argsFantasmas[i]
+        """ for i in range(self.CONSTANT.N_FANTASMAS):
+            datos = self.CONSTANT.LISTA_ARGS_FANTASMAS[i]
             coorX = datos[0]
             coorY = datos[1]
             self.instanciar_fantasma(coorX, coorY, i, datos[3], False, False) """
@@ -172,19 +132,19 @@ class Game:
     
     def instanciar_textos_iniciales(self):
         """Instanciar textos marcadores, Preparado..."""
-        margen = 9
+        MARGEN = 9
 
-        self.instanciar_texto(self.TXT_PREPARADO, 90, (self.RESOLUCION[0] - self.ZONA_SCORES) // 2,
-            300, self.colores.VERDE_FONDO, negrita=True)
+        self.instanciar_texto(self.CO.TXT_PREPARADO, 90, (self.CO.RESOLUCION[0] - self.CO.ZONA_SCORES) // 2,
+            300, self.COL.VERDE_FONDO, negrita=True)
         
-        self.instanciar_texto("Puntos", 48, self.RESOLUCION[0] - self.ZONA_SCORES + margen,
-            self.TY, self.colores.AMARILLENTO, negrita=True, centrado=False)
-        self.instanciar_texto("Nivel", 48, self.RESOLUCION[0] - self.ZONA_SCORES + margen,
-            self.TY * 4, self.colores.AMARILLENTO, negrita=True, centrado=False)
-        self.instanciar_texto("0", 48, self.RESOLUCION[0] - self.ZONA_SCORES + margen,
-            self.TY * 2, self.colores.BLANCO, negrita=True, centrado=False, tipo="dinamico-puntos")
-        self.instanciar_texto(str(self.nivel), 48, self.RESOLUCION[0] - self.ZONA_SCORES + margen,
-            self.TY * 5, self.colores.BLANCO, negrita=True, centrado=False, tipo="dinamico-nivel")
+        self.instanciar_texto("Puntos", 48, self.CO.RESOLUCION[0] - self.CO.ZONA_SCORES + MARGEN,
+            self.CO.TY, self.COL.AMARILLENTO, negrita=True, centrado=False)
+        self.instanciar_texto("Nivel", 48, self.CO.RESOLUCION[0] - self.CO.ZONA_SCORES + MARGEN,
+            self.CO.TY * 4, self.COL.AMARILLENTO, negrita=True, centrado=False)
+        self.instanciar_texto("0", 48, self.CO.RESOLUCION[0] - self.CO.ZONA_SCORES + MARGEN,
+            self.CO.TY * 2, self.COL.BLANCO, negrita=True, centrado=False, tipo="dinamico-puntos")
+        self.instanciar_texto(str(self.nivel), 48, self.CO.RESOLUCION[0] - self.CO.ZONA_SCORES + MARGEN,
+            self.CO.TY * 5, self.COL.BLANCO, negrita=True, centrado=False, tipo="dinamico-nivel")
     
     def instanciar_texto(self, txt, size, x, y, color, fondo=None, negrita=False, centrado=True, tipo=None):
         """Instanciar un texto y agregarlo a su lista correspondiente..."""
@@ -204,28 +164,28 @@ class Game:
             self.listas_sprites["textos"].update()
         else:
             calculo = pygame.time.get_ticks()
-            if calculo - self.ultimo_update_preparado > self.DURACION_PREPARADO:
+            if calculo - self.ultimo_update_preparado > self.CO.DURACION_PREPARADO:
                 self.ultimo_update_preparado = calculo
                 self.preparado = False
                 for sprite in self.listas_sprites["textos"]:
-                    if isinstance(sprite, Textos) and sprite.texto == self.TXT_PREPARADO:
+                    if isinstance(sprite, Textos) and sprite.texto == self.CO.TXT_PREPARADO:
                         self.listas_sprites["textos"].remove(sprite)
                         break
         
         #self.checkTransicion_gameOverRejugar()
         
         pygame.display.flip()
-        self.reloj.tick(self.FPS)
+        self.reloj.tick(self.CO.FPS)
     
     def draw(self):
-        self.pantalla.fill(self.colores.GRIS_FONDO)
+        self.pantalla.fill(self.COL.GRIS_FONDO)
         
         self.listas_sprites["all_sprites"].draw(self.pantalla)
         #self.listas_sprites["fantasmas"].draw(self.pantalla)
 
         # dibujar rectangulo "transparente" escapatoria
-        pygame.draw.rect(self.pantalla, self.colores.GRIS_FONDO, 
-            (self.COLUMNAS * self.TX, 11 * self.TY, self.TX, self.TY))
+        pygame.draw.rect(self.pantalla, self.COL.GRIS_FONDO, 
+            (self.CO.COLUMNAS * self.CO.TX, 11 * self.CO.TY, self.CO.TX, self.CO.TY))
         
         #self.renderizar_vidasMarcador()
         
@@ -233,7 +193,7 @@ class Game:
         self.listas_sprites["textos"].draw(self.pantalla)
     
     def check_event(self):
-         for event in pygame.event.get():
+        for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.program_running = False
                 pygame.quit()

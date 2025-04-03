@@ -1,11 +1,16 @@
 import pygame
 
+# ====================================================================================
+#   varios.py (modulo de varias clases pequeñas que requieren poca logica)
+#   class --> LaberintoTile, Puntitos, PuntosGordos, Textos, ItemFrutas
+#
+# ------------------------------------------------------------------------------------
 class LaberintoTile(pygame.sprite.Sprite):
     def __init__(self, game, x, y, valor_tile):
         super().__init__()
         self.game = game
-        self.TX = self.game.TX
-        self.TY = self.game.TY
+        self.TX = self.game.CO.TX
+        self.TY = self.game.CO.TY
 
         nivel = min(self.game.nivel, 3)  # Limitar nivel máximo a 3
         self.image = self.game.obtener_grafico(f'bloquepac{nivel}.png', 1)[0]
@@ -22,8 +27,8 @@ class Puntitos(pygame.sprite.Sprite):
     def __init__(self, game, x, y, valor_tile):
         super().__init__()
         self.game = game
-        self.TX = self.game.TX
-        self.TY = self.game.TY
+        self.TX = self.game.CO.TX
+        self.TY = self.game.CO.TY
 
         self.image = self.game.obtener_grafico('pildopac.png', 0.2)[0]
         self.rect = self.game.obtener_grafico('pildopac.png', 0.2)[1]
@@ -35,14 +40,14 @@ class Puntitos(pygame.sprite.Sprite):
             self.kill()
             self.game.puntos += Puntitos.SUMA_PUNTOS
             #self.game.sonido_sirena.stop()
-            #self.game.cargar_sonidos()["wakawaka"].play(maxtime=500)
+            self.game.sonidos.reproducir("wakawaka", duracion=450)
 
 class PuntosGordos(pygame.sprite.Sprite):
     def __init__(self, game, x, y, valor_tile):
         super().__init__()
         self.game = game
-        self.TX = self.game.TX
-        self.TY = self.game.TY
+        self.TX = self.game.CO.TX
+        self.TY = self.game.CO.TY
 
         self.escala = 0.5
         self.vel_anima = 150
@@ -121,7 +126,7 @@ class ItemFrutas(pygame.sprite.Sprite):
         # Limitar el número máximo de niveles para la fruta
         item_nivel = min(self.game.nivel, 4)
         self.image, self.rect = self.game.obtenerGrafico(f'item{item_nivel}.png', 1)
-        self.rect.x, self.rect.y = x * self.game.TX, y * self.game.TY
+        self.rect.x, self.rect.y = x * self.game.CO.TX, y * self.game.CO.TY
 
     def update(self):
         if pygame.sprite.spritecollide(self, self.game.lista_pacman, False):

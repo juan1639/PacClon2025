@@ -1,6 +1,7 @@
 # ======================================================================
-# 	Módulo (laberintos.py) ... class arrays Laberintos Pantallas 
+# 	laberintos.py (modulo que nos provee de los laberintos/escenarios)
 #
+# 	class arrays Laberintos Pantallas 
 #-----------------------------------------------------------------------
 class Pantallas:
 	@staticmethod
