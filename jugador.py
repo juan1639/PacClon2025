@@ -47,7 +47,7 @@ class PacMan(pygame.sprite.Sprite):
         self.velocidad = 2
         self.avanzar = True
         self.ultimo_update = pygame.time.get_ticks()
-        self.fotograma_vel = 90# Velocidad de la animación
+        self.fotograma_vel = 90 # Velocidad de la animación
         self.sonido_sirena_intervalo = 500
         self.ultimo_sonido = pygame.time.get_ticks()
 

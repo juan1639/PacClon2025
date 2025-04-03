@@ -40,7 +40,7 @@ class Puntitos(pygame.sprite.Sprite):
             self.kill()
             self.game.puntos += Puntitos.SUMA_PUNTOS
             #self.game.sonido_sirena.stop()
-            self.game.sonidos.reproducir("wakawaka", duracion=450)
+            #self.game.sonidos.reproducir("wakawaka", duracion=450)
 
 class PuntosGordos(pygame.sprite.Sprite):
     def __init__(self, game, x, y, valor_tile):
@@ -87,7 +87,7 @@ class PuntosGordos(pygame.sprite.Sprite):
                 self.game.instanciar_fantasma(x, y, fantasma.idFantasma, fantasma.direccion, azul=True, ojos=False)
                 fantasma.kill() """
 
-            #self.game.sonido_eatingGhost.play()
+            self.game.sonidos.reproducir("eating_ghost")
 
 class Textos(pygame.sprite.Sprite):
     def __init__(self, game, texto, size, x, y, color, fondo=None, negrita=False, centrado=True, tipo=None):
@@ -118,22 +118,23 @@ class Textos(pygame.sprite.Sprite):
             self.image = self.font.render(f'{self.game.nivel}', True, self.color, self.fondo)
 
 class ItemFrutas(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    X, Y = 9, 11
+
+    def __init__(self, game):
         super().__init__()
         self.game = game
-        self.x, self.y = x, y
 
         # Limitar el número máximo de niveles para la fruta
         item_nivel = min(self.game.nivel, 4)
-        self.image, self.rect = self.game.obtenerGrafico(f'item{item_nivel}.png', 1)
-        self.rect.x, self.rect.y = x * self.game.CO.TX, y * self.game.CO.TY
+        self.image, self.rect = self.game.obtener_grafico(f'item{item_nivel}.png', 1)
+        self.rect.x, self.rect.y = ItemFrutas.X * self.game.CO.TX, ItemFrutas.Y * self.game.CO.TY
 
     def update(self):
-        if pygame.sprite.spritecollide(self, self.game.lista_pacman, False):
+        if pygame.sprite.spritecollide(self, self.game.listas_sprites["pacman"], False):
             self.kill()
             puntos_fruta = (self.game.nivel * 10) ** 2
             self.game.puntos += puntos_fruta
-            self.game.ultimo_update_itemFruta = pygame.time.get_ticks()
-            self.game.instanciaPtosComeFantasmas(puntos_fruta, self.x, self.y)
-            self.game.sonido_eatingCherry.play()
+            self.game.ultimo_update["item-fruta"] = pygame.time.get_ticks()
+            #self.game.instanciaPtosComeFantasmas(puntos_fruta, self.x, self.y)
+            self.game.sonidos.reproducir("eating_cherry")
 

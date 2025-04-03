@@ -29,11 +29,16 @@ class Game:
         self.puntos = 0
         self.vidas = 3
 
-        # Varios
+        # Relativos a fantasmas
         self.sumaPtosComeFantasmas = 100	# 200 -> 400 -> 800 -> 1600
-        self.temporizadorAzules = False 
-        self.ultimo_update_azules = pygame.time.get_ticks()
-        self.ultimo_update_preparado = pygame.time.get_ticks()
+        self.temporizadorAzules = False
+
+        # Listas updates (tomas de tiempo/temporizadores)
+        self.ultimo_update = {
+            "azules": pygame.time.get_ticks(),
+            "preparado": pygame.time.get_ticks(),
+            "item-fruta": pygame.time.get_ticks()
+        }
 
         # Estados del juego
         self.program_running = True
@@ -100,7 +105,7 @@ class Game:
         self.crear_pantalla_nivel()
         self.instanciar_objetos()
         self.instanciar_textos_iniciales()
-        self.sonidos.reproducir("inicio_nivel")
+        #self.sonidos.reproducir("inicio_nivel")
     
     def obtener_grafico(self, nombrePng, escala):
         """Devolver una imagen y un rectangulo."""
@@ -130,6 +135,19 @@ class Game:
         #self.lista_sprites_adibujar.add(fantasma)
         self.listas_sprites["fantasmas"].add(fantasma)
     
+    def instanciar_fruta_periodicamente(self):
+        """Instanciar/re-instanciar Item-Fruta periodicamente..."""
+        if len(self.listas_sprites["items"]) != 0:
+            return
+        
+        calculo = pygame.time.get_ticks()
+        if calculo - self.ultimo_update["item-fruta"] > self.CO.INTERVALO_FRUTA:
+            self.ultimo_update["item-fruta"] = calculo
+            print("Instanciada-Fruta")
+            newFruta = ItemFrutas(self)
+            self.listas_sprites["all_sprites"].add(newFruta)
+            self.listas_sprites["items"].add(newFruta)
+    
     def instanciar_textos_iniciales(self):
         """Instanciar textos marcadores, Preparado..."""
         MARGEN = 9
@@ -156,16 +174,16 @@ class Game:
         
         #self.checkTemporizadorAzules()
         #self.checkNivelSuperado()
-        #self.instanciar_itemFrutas()
-        
+        self.instanciar_fruta_periodicamente()
+
         if not self.preparado:
             self.listas_sprites["all_sprites"].update()
             #self.listas_sprites["fantasmas"].update()
             self.listas_sprites["textos"].update()
         else:
             calculo = pygame.time.get_ticks()
-            if calculo - self.ultimo_update_preparado > self.CO.DURACION_PREPARADO:
-                self.ultimo_update_preparado = calculo
+            if calculo - self.ultimo_update["preparado"] > self.CO.DURACION_PREPARADO:
+                self.ultimo_update["preparado"] = calculo
                 self.preparado = False
                 for sprite in self.listas_sprites["textos"]:
                     if isinstance(sprite, Textos) and sprite.texto == self.CO.TXT_PREPARADO:
@@ -209,7 +227,7 @@ class Game:
                     self.menu_presentacion = False
                     self.en_juego = True
                     self.preparado = True
-                    self.ultimo_update_preparado = pygame.time.get_ticks()
+                    self.ultimo_update["preparado"] = pygame.time.get_ticks()
                     #self.sonido_inicioNivel.play()
                     self.new_game()
     

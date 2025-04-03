@@ -20,6 +20,7 @@ class Constantes:
     N_FANTASMAS = 4
     DURACION_AZULES = 8000 # Duracion de los 'fantasmas-azules' en el nivel 1
     DURACION_PREPARADO = 4200
+    INTERVALO_FRUTA = 12000
     TXT_PREPARADO = " Preparado! "
     ZONA_SCORES = 200
     RESOLUCION = (TX * COLUMNAS + ZONA_SCORES, TY * FILAS)
