@@ -52,7 +52,7 @@ class PacMan(pygame.sprite.Sprite):
         self.ultimo_sonido = pygame.time.get_ticks()
 
     def update(self):
-        if not self.game.en_juego:
+        if not self.game.estado_juego["en_juego"]:
             return
 
         self.leer_teclado()
@@ -125,7 +125,6 @@ class PacMan(pygame.sprite.Sprite):
         if pygame.time.get_ticks() - self.ultimo_sonido > self.sonido_sirena_intervalo:
             self.ultimo_sonido = pygame.time.get_ticks()
             self.game.sonidos["sirena"].play(maxtime=500)
-
 
 class PacManDies(pygame.sprite.Sprite):
     def __init__(self, game, x, y):

@@ -40,13 +40,17 @@ class Game:
             "item-fruta": pygame.time.get_ticks()
         }
 
-        # Estados del juego
+        # True= Se ejecuta el bucle Principal | False= no se ejecuta
         self.program_running = True
-        self.menu_presentacion = True
-        self.preparado = False
-        self.en_juego = False
-        self.game_over = False
-        self.nivel_superado = False
+
+        # Estados del juego
+        self.estado_juego = {
+            "menu_presentacion": True,
+            "preparado": False,
+            "en_juego": False,
+            "game_over": False,
+            "nivel_superado": False
+        }
 
         # Inicializar listas con sprites
         self.listas_sprites = {
@@ -99,6 +103,9 @@ class Game:
         for grupo in self.listas_sprites.values():
             grupo.empty()
     
+    def resetear_estados_juego(self):
+        self.estado_juego = {clave: False for clave in self.estado_juego}
+    
     def new_game(self):
         """Preparar un nuevo nivel o juego."""
         self.vaciar_listas()
@@ -137,7 +144,7 @@ class Game:
     
     def instanciar_fruta_periodicamente(self):
         """Instanciar/re-instanciar Item-Fruta periodicamente..."""
-        if len(self.listas_sprites["items"]) != 0:
+        if len(self.listas_sprites["items"]) != 0 or not self.estado_juego["en_juego"]:
             return
         
         calculo = pygame.time.get_ticks()
@@ -176,7 +183,7 @@ class Game:
         #self.checkNivelSuperado()
         self.instanciar_fruta_periodicamente()
 
-        if not self.preparado:
+        if not self.estado_juego["preparado"]:
             self.listas_sprites["all_sprites"].update()
             #self.listas_sprites["fantasmas"].update()
             self.listas_sprites["textos"].update()
@@ -184,7 +191,9 @@ class Game:
             calculo = pygame.time.get_ticks()
             if calculo - self.ultimo_update["preparado"] > self.CO.DURACION_PREPARADO:
                 self.ultimo_update["preparado"] = calculo
-                self.preparado = False
+                self.resetear_estados_juego()
+                self.estado_juego["preparado"] = False
+                self.estado_juego["en_juego"] = True
                 for sprite in self.listas_sprites["textos"]:
                     if isinstance(sprite, Textos) and sprite.texto == self.CO.TXT_PREPARADO:
                         self.listas_sprites["textos"].remove(sprite)
@@ -222,14 +231,18 @@ class Game:
                     pygame.quit()
                     sys.exit()
                 
-                if event.key == pygame.K_RETURN and self.menu_presentacion:
+                if event.key == pygame.K_RETURN and self.estado_juego["menu_presentacion"]:
                     pygame.mixer.music.stop()
-                    self.menu_presentacion = False
-                    self.en_juego = True
-                    self.preparado = True
+                    self.resetear_estados_juego()
+                    self.estado_juego["preparado"] = True
+                    self.estado_juego["en_juego"] = True
                     self.ultimo_update["preparado"] = pygame.time.get_ticks()
                     #self.sonido_inicioNivel.play()
                     self.new_game()
+                
+                if event.key == pygame.K_TAB:
+                    for clave in self.estado_juego:
+                        print(clave, self.estado_juego[clave])
     
     def bucle_principal(self):
         while self.program_running:
